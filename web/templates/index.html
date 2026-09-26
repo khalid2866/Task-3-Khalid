@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Image Generation Studio — Project 3</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header>
+  <div class="brand">◈ Image Generation Studio</div>
+  <div class="sub">Multimodal Image Generation Studio · Project 3 · DecodeLabs</div>
+</header>
+
+<main>
+  <section class="panel">
+    <h2>New generation</h2>
+    <label>Prompt
+      <textarea id="prompt" rows="3" placeholder="Describe the image — e.g. a neon cityscape at night, cinematic lighting"></textarea>
+    </label>
+    <div class="row">
+      <label>Engine
+        <select id="engine">
+          {% for e in engines %}
+          <option value="{{ e.name }}" {% if e.name == 'demo' %}selected{% endif %}>
+            {{ e.label }} — max {{ e.prompt_limit }} chars{% if e.needs_key %} · needs key{% endif %}
+          </option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Aspect ratio
+        <select id="aspect">
+          {% for a in aspects %}
+          <option value="{{ a.aspect }}">{{ a.aspect }} — {{ a.width }}×{{ a.height }} · {{ a.target }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+    <button id="generate" onclick="generate()">Generate</button>
+    <div id="status" class="status hidden"></div>
+    <div id="stages" class="stages hidden"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Gallery <button class="mini" onclick="loadAssets()">↻ refresh</button></h2>
+    <div id="gallery" class="gallery"></div>
+  </section>
+
+  <section class="panel dim">
+    <h2>Pipeline blueprint</h2>
+    <ol class="blueprint">
+      <li><b>Prompt Payload Formulation</b> — aspect ratio → exact pixel payload; engine char limits enforced.</li>
+      <li><b>Network API Gateway</b> — split timeout <code>(3.05s, 60s)</code>; ConnectTimeout fails fast, ReadTimeout/429/503 retry with exponential backoff + jitter.</li>
+      <li><b>Security &amp; Moderation Gates</b> — Gate 1 input filter (instant, 0 compute); Gate 2 output filter (blurred placeholder on block).</li>
+      <li><b>Transport Protocol</b> — memory-safe chunked streaming, 64 KiB slices straight to disk.</li>
+      <li><b>Integrity Verification</b> — forced <code>Image.open().load()</code> pixel decode; truncated assets discarded + retried.</li>
+      <li><b>Automated QA</b> — Lens 1 aesthetic score &gt; 7.0/10 or discard; Lens 2 semantic alignment flags divergent assets.</li>
+    </ol>
+  </section>
+</main>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
